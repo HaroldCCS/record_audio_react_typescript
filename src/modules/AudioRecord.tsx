@@ -1,20 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { PropsWithChildren, useEffect, useState, useRef } from "react";
 import Canvas from "./Canvas";
 
-interface IAudioProps {}
+interface IAudioProps extends PropsWithChildren<any>{
+    audioDuration?: number
+}
 
 const config = { mimeType: "audio/webm" };
 
 let mediaRecorder: MediaRecorder | null = null;
 let recordedChunks: Blob[] | any = [];
 
-const AudioRecord: React.FC<IAudioProps> = (props) => {
+const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
+    //states
     const [globalStream, updateGlobalStream] = useState<any>(null);
     const [permissionMicro, updatePermissionMicro] = useState<boolean>(false);
     const [srcAudio, updateSrcAudio] = useState<string>("");
     const [isRecord, updateIsRecord] = useState<boolean>(false);
     const [isPause, updateIsPause] = useState<boolean>(false);
+    const [sizeAudio, updateSizeAudio] = useState<number>(10);
 
+    //Ref
+    const isPausetRef = useRef(isPause);
+    isPausetRef.current = isPause;
+    const isRecordtRef = useRef(isRecord);
+    isRecordtRef.current = isRecord;
+
+    const intervalDuration: number =  (audioDuration ? audioDuration : 0 )  / 10;
     //validate microphone
     useEffect(() => {
         navigator.mediaDevices
@@ -26,6 +37,25 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
                 updateGlobalStream(stream);
             });
     }, [permissionMicro]);
+
+
+    const countDuration = (value: number, pauseds: boolean = true) => {
+        const validationRecord  = isRecordtRef.current === false && value === 0 ? true : isRecordtRef.current 
+        const validationPaused  = pauseds ? isPausetRef.current : false
+        if (validationRecord && !validationPaused) {
+
+            let count = value + 50;
+            if (count >= intervalDuration) {
+                updateSizeAudio(count)
+                handlerEnd()
+            } else {
+                setTimeout(() => {
+                    updateSizeAudio(count)
+                    countDuration(count)
+                }, 500);
+            }
+        }
+    }
 
     const handlerStart = () => {
         updateIsRecord(true);
@@ -65,6 +95,8 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
 
         // Start recorder event of media recorder instance.
         mediaRecorder.start();
+
+        countDuration(0);
     };
 
     const handlerEnd = () => {
@@ -83,10 +115,11 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
         if (value) {
             mediaRecorder?.pause();
             updateIsPause(true)
-            
+
         } else {
             mediaRecorder?.resume();
             updateIsPause(false)
+            countDuration(sizeAudio, false)
         }
     }
 
@@ -115,6 +148,7 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
 
                                     <br />
                                     <Canvas />
+                                    <div>{sizeAudio / 10}%  | max {(audioDuration ? audioDuration : 0 ) / 1000}s</div>
                                 </>
                             ) : (
                                 <button onClick={() => handlerPause(false)}>
@@ -142,5 +176,10 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
         </div>
     );
 };
+
+
+AudioRecord.defaultProps = {
+    audioDuration: 10000
+}
 
 export default AudioRecord;
