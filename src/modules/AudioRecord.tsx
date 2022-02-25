@@ -73,6 +73,12 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
         updateIsRecord(false);
     };
 
+
+    const handlerDelete = () => {
+        updateSrcAudio("")
+    };
+
+
     const handlerPause = (value: boolean) => {
         if (value) {
             mediaRecorder?.pause();
@@ -121,7 +127,14 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
                     <br />
                     <br />
 
-                    {srcAudio && <audio controls src={srcAudio} />}
+                    {srcAudio && 
+                    <>
+                        <audio controls src={srcAudio} />
+                        <button onClick={() => handlerDelete()}>
+                            Eliminar audio
+                        </button>
+                    </>
+                    }
                 </>
             ) : (
                 <p>No tenemos el permiso del navegador para grabar audio :(</p>
