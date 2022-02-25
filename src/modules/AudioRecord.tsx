@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Canvas from "./Canvas";
 
 interface IAudioProps {}
 
@@ -82,7 +83,14 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
                             {srcAudio ? "Grabar de nuevo" : "Grabar"}
                         </button>
                     ) : (
-                        <button onClick={() => handlerEnd()}> Detener</button>
+                        <>
+                            <button onClick={() => handlerEnd()}>
+                                {" "}
+                                Detener
+                            </button>
+                            <br />
+                            <Canvas />
+                        </>
                     )}
                     <br />
                     <br />
