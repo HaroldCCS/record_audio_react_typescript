@@ -13,6 +13,7 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
     const [permissionMicro, updatePermissionMicro] = useState<boolean>(false);
     const [srcAudio, updateSrcAudio] = useState<string>("");
     const [isRecord, updateIsRecord] = useState<boolean>(false);
+    const [isPause, updateIsPause] = useState<boolean>(false);
 
     //validate microphone
     useEffect(() => {
@@ -54,7 +55,7 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
 
         // Event start where you can execute custom actions.
         mediaRecorder.addEventListener("start", function () {
-            console.log("addEventListener start");
+            //console.log("addEventListener start");
         });
 
         // Event error where you can execute custom actions.
@@ -72,6 +73,18 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
         updateIsRecord(false);
     };
 
+    const handlerPause = (value: boolean) => {
+        if (value) {
+            mediaRecorder?.pause();
+            updateIsPause(true)
+            
+        } else {
+            mediaRecorder?.resume();
+            updateIsPause(false)
+        }
+    }
+
+
     return (
         <div>
             <h1>Grabar audio</h1>
@@ -85,11 +98,23 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
                     ) : (
                         <>
                             <button onClick={() => handlerEnd()}>
-                                {" "}
                                 Detener
                             </button>
-                            <br />
-                            <Canvas />
+
+                            {!isPause ? (
+                                <>
+                                    <button onClick={() => handlerPause(true)}>
+                                        Pausar
+                                    </button>
+
+                                    <br />
+                                    <Canvas />
+                                </>
+                            ) : (
+                                <button onClick={() => handlerPause(false)}>
+                                    Des pausar
+                                </button>
+                            )}
                         </>
                     )}
                     <br />
