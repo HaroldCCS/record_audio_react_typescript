@@ -1,0 +1,96 @@
+.container-audio{
+    background-color: white;
+    max-width: 263px;
+    height: 64px;
+    box-shadow: 0px 6px 16px rgba(10, 66, 87, 0.07843);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1rem;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
+
+    .container-buttom{
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(199, 199, 199, 0.239);
+        border-radius: 2rem;
+        transition: 500ms;
+    }
+
+    .container-buttom:hover{
+        background-color: rgba(199, 199, 199, 0.473);
+        transition: 500ms;
+    }
+    
+
+    .container-progress{
+        width: 170px;
+        height: 50px;
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        font-family: Nunito;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 10px;
+        line-height: 14px;
+        color: #8F989d;
+
+        .progress-bar{
+            height: 0.4rem;
+            width: 100%;
+            background-color: #F0F1F2;
+            border-radius: 2rem;
+            .progress-bar-audio{
+                border-radius: 2rem;
+                height: 0.4rem;
+                width: 20%;
+                background-color: #292929;
+            }
+        }
+
+        .duration-audio{
+            position: absolute;
+            width: 50px;
+            height: 10px;
+            bottom: 10px;
+            display: flex;
+            justify-content: start;
+        }
+
+        .date-audio{
+            position: absolute;
+            width: 100px;
+            height: 10px;
+            bottom: 10px;
+            right: 0;
+            display: flex;
+            justify-content: end;
+        }
+    }
+    .container-trash{
+        width: 20px;
+        height: 20px;
+        color:rgb(200, 200, 200);
+        transition: 500ms;
+    }
+    .container-trash:hover{
+        color: red;
+        transition: 500ms;
+        cursor: pointer;
+    }
+}
+
+.centrado_audio{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 3rem;
+}

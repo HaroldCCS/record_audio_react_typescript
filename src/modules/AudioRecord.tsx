@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from "react";
 import Canvas from "./Canvas";
+import ViewAudio from "./ViewAudio";
 
 interface IAudioProps {}
 
-const config = { mimeType: "audio/webm" };
+const config = 
+( () => {
+    if (MediaRecorder.isTypeSupported( "audio/webm")) {
+        console.log("soporto webm")
+        return { mimeType: "audio/webm" };
+    } else if(MediaRecorder.isTypeSupported( "audio/ogg")){
+        console.log("soporto ogg")
+        return { mimeType: "audio/webm" };
+    } else {
+        return { mimeType: "audio/webm" };
+    }
+})
 
 let mediaRecorder: MediaRecorder | null = null;
 let recordedChunks: Blob[] | any = [];
@@ -32,19 +44,21 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
         // Add class animation loop.
 
         // Init instance MediaRecorder.
-        mediaRecorder = new MediaRecorder(globalStream, config);
+        mediaRecorder = new MediaRecorder(globalStream, config());
 
         // Event for save data recorered into array chunks.
         mediaRecorder.addEventListener("dataavailable", (e) => {
             if (e.data.size > 0) {
                 recordedChunks.push(e.data);
+                //download()
             }
         });
 
         // Event stop where you can execute custom actions.
         mediaRecorder.addEventListener("stop", function () {
             // Create object url from blob.
-            const objectRef = URL.createObjectURL(new Blob(recordedChunks));
+            const blobAudio = new Blob(recordedChunks, {type: config().mimeType})
+            const objectRef = URL.createObjectURL(blobAudio);
 
             updateSrcAudio(objectRef);
 
@@ -67,10 +81,25 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
         mediaRecorder.start();
     };
 
+
+    const download = () => {
+        var blob = new Blob(recordedChunks, {
+            type: config().mimeType
+        });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        document.body.appendChild(a);
+        a.href = url;
+        a.download = "test.webm";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      }
+
     const handlerEnd = () => {
         // Stop recorder event of media recorder instance.
         mediaRecorder?.stop();
         updateIsRecord(false);
+        updateIsPause(false)
     };
 
 
@@ -94,7 +123,9 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
     return (
         <div>
             <h1>Grabar audio</h1>
-
+            < ViewAudio audioLink="https://uploads-kuepa.s3.us-west-2.amazonaws.com/alliance/talk_channel/audio/7cEJ4L9g8hNhAiktVliU.webm" />
+            < ViewAudio audioLink="https://uploads-kuepa.s3.us-west-2.amazonaws.com/alliance/talk_channel/audio/ZKkGjS3qqI3e12P6KXS9.webm" />
+            
             {permissionMicro ? (
                 <>
                     {!isRecord ? (
@@ -129,7 +160,7 @@ const AudioRecord: React.FC<IAudioProps> = (props) => {
 
                     {srcAudio && 
                     <>
-                        <audio controls src={srcAudio} />
+                        < ViewAudio audioLink={srcAudio} />
                         <button onClick={() => handlerDelete()}>
                             Eliminar audio
                         </button>
