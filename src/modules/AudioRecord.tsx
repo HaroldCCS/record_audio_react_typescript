@@ -17,7 +17,7 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
     const [srcAudio, updateSrcAudio] = useState<string>("");
     const [isRecord, updateIsRecord] = useState<boolean>(false);
     const [isPause, updateIsPause] = useState<boolean>(false);
-    const [sizeAudio, updateSizeAudio] = useState<number>(10);
+    const [sizeAudio, updateSizeAudio] = useState<number>(0);
 
     //Ref
     const isPausetRef = useRef(isPause);
@@ -45,7 +45,7 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
         if (validationRecord && !validationPaused) {
 
             let count = value + 50;
-            if (count >= intervalDuration) {
+            if (count >= intervalDuration + 50) {
                 updateSizeAudio(count)
                 handlerEnd()
             } else {
@@ -148,7 +148,7 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
 
                                     <br />
                                     <Canvas />
-                                    <div>{sizeAudio / 10}%  | max {(audioDuration ? audioDuration : 0 ) / 1000}s</div>
+                                    <div>{Math.round(sizeAudio / 100)}s  | max {(audioDuration ? audioDuration : 0 ) / 1000}s</div>
                                 </>
                             ) : (
                                 <button onClick={() => handlerPause(false)}>
