@@ -5,7 +5,16 @@ interface IAudioProps extends PropsWithChildren<any>{
     audioDuration?: number
 }
 
-const config = { mimeType: "audio/webm" };
+const config =
+( () => {
+    if(MediaRecorder.isTypeSupported( "audio/webm")){
+        return { mimeType: "audio/webm" };
+    } else if(MediaRecorder.isTypeSupported( "audio/ogg")){
+        return { mimeType: "audio/ogg" };
+    } else {
+        return { mimeType: "audio/webm" };
+    }
+})
 
 let mediaRecorder: MediaRecorder | null = null;
 let recordedChunks: Blob[] | any = [];
@@ -25,7 +34,18 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
     const isRecordtRef = useRef(isRecord);
     isRecordtRef.current = isRecord;
 
-    const intervalDuration: number =  (audioDuration ? audioDuration : 0 )  / 10;
+    const intervalDuration = () : number => {
+        return durationTime((audioDuration ? audioDuration : 0 )  / 10)
+    }
+
+    const durationTime = (value: number) :number => {
+        if ("audio/ogg" === config().mimeType) {
+            value /= 3;
+        } 
+        console.log(value)
+        return value
+    }
+    
     //validate microphone
     useEffect(() => {
         navigator.mediaDevices
@@ -45,7 +65,7 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
         if (validationRecord && !validationPaused) {
 
             let count = value + 50;
-            if (count >= intervalDuration + 50) {
+            if (count >= intervalDuration() + 50) {
                 updateSizeAudio(count)
                 handlerEnd()
             } else {
@@ -62,7 +82,7 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
         // Add class animation loop.
 
         // Init instance MediaRecorder.
-        mediaRecorder = new MediaRecorder(globalStream, config);
+        mediaRecorder = new MediaRecorder(globalStream, config());
 
         // Event for save data recorered into array chunks.
         mediaRecorder.addEventListener("dataavailable", (e) => {
@@ -74,7 +94,7 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
         // Event stop where you can execute custom actions.
         mediaRecorder.addEventListener("stop", function () {
             // Create object url from blob.
-            const objectRef = URL.createObjectURL(new Blob(recordedChunks));
+            const objectRef = URL.createObjectURL(new Blob(recordedChunks, {type: config().mimeType}));
 
             updateSrcAudio(objectRef);
 
@@ -128,6 +148,26 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
         <div>
             <h1>Grabar audio</h1>
 
+            <p>Duracion del audio: 10s</p>
+            <p>Dato curioso: el formato ogg pesa 3 veces mas que webm</p>
+            <p>Para el ejemplo, si no soporta webm, se usara ogg pero el tiempo se dividira en 3</p>
+            <hr />
+            <br />
+            esto es un audio en formato webm, por favor confirmar si se logra escuchar en safari movil
+            <br />
+            <audio controls  src="https://uploads-kuepa.s3.us-west-2.amazonaws.com/alliance/talk_channel/audio/7nFqyLppLuolRgiyr5i5.webm"/>
+                <br/>
+                <hr />
+
+            <p>
+                ¿Formato webm es soportado? : {MediaRecorder.isTypeSupported( "audio/webm") ? "Si" : "No"}
+            </p>            
+            <p>
+                ¿Formato ogg es soportado? : {MediaRecorder.isTypeSupported( "audio/ogg") ? "Si" : "No"}
+            </p>
+
+            <hr />
+
             {permissionMicro ? (
                 <>
                     {!isRecord ? (
@@ -148,7 +188,7 @@ const AudioRecord: React.FC<IAudioProps> = ({audioDuration}) => {
 
                                     <br />
                                     <Canvas />
-                                    <div>{Math.round(sizeAudio / 100)}s  | max {(audioDuration ? audioDuration : 0 ) / 1000}s</div>
+                                    <div>{Math.round(sizeAudio / 100)}s  | max {Math.round((durationTime(audioDuration ? audioDuration : 0 )) / 1000)}s</div>
                                 </>
                             ) : (
                                 <button onClick={() => handlerPause(false)}>
